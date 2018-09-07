@@ -10,7 +10,7 @@
 
 <script>
     export default {
-        name: "functionPane"
+        name: "function-pane"
     }
 </script>
 
@@ -18,7 +18,7 @@
     .header {
         height: 100px;
         position: relative;
-        background-color: #EEEEEE;
+        background-color: #43B0FE;
     }
 
     .logo {
