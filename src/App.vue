@@ -7,7 +7,9 @@
       <el-aside>
           <aside-pane></aside-pane>
       </el-aside>
-      <el-main>Main</el-main>
+      <el-main>
+          <canvas-pane></canvas-pane>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -27,12 +29,16 @@
 <style>
     /* overwrite CSS of element-ui */
     .el-header {
-        height: 100px !important;
+        height: 80px !important;
         padding: 0 !important;
     }
 
     .el-aside {
-        width: 260px !important;
+        width: 240px !important;
+    }
+
+    .el-main {
+        padding: 0;
     }
 
     .whole-page {

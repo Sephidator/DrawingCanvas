@@ -58,8 +58,8 @@
 
     .aside {
         height: 100%;
-        width: 260px;
-        background-color: #F6F6F6;
+        width: 240px;
+        background-color: #F8F8F8;
     }
 
     .color-board {
@@ -68,8 +68,8 @@
     }
 
     .radial-color-picker {
-        width: 220px;
-        height: 220px;
+        width: 200px;
+        height: 200px;
     }
 
     .button-list {
@@ -82,7 +82,7 @@
 
     /* overwrite CSS of element-ui */
     .el-button {
-        width: 220px;
+        width: 200px;
         height: 60px;
         font-size: 16px;
     }
