@@ -17,7 +17,7 @@
 
 <style scoped>
     .header {
-        height: 100px;
+        height: 80px;
         background-color: #43B0FE;
         display: flex;
     }
@@ -25,13 +25,13 @@
     .logo {
         margin: 10px 20px;
         float: left;
-        width: 100px;
-        height: 80px;
+        width: 80px;
+        height: 60px;
         background-image: url(../assets/logo.png);
     }
 
     .title {
-        font-size: 48px;
+        font-size: 40px;
         color: white;
         margin: auto auto auto 20px;
     }
@@ -41,9 +41,9 @@
     }
 
     .load-button {
-        height: 60px;
-        width: 60px;
-        margin: 20px;
-        font-size: 30px;
+        height: 50px;
+        width: 50px;
+        margin: 15px;
+        font-size: 25px;
     }
 </style>
