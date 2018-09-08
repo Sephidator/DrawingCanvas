@@ -1,29 +1,29 @@
 <template>
     <div class="aside">
         <div class="color-board">
-            <color-picker v-model="color" @select="onColorSelect" class="radial-color-picker"></color-picker>
+            <color-picker v-model="color" @input="setColor" class="radial-color-picker"></color-picker>
             <el-form label-position="left" label-width="60px" style="margin: 10px">
                 <el-form-item label="饱和度" style="margin: 0">
-                    <el-slider v-model="color.saturation"></el-slider>
+                    <el-slider v-model="color.saturation" @change="setColor"></el-slider>
                 </el-form-item>
                 <el-form-item label="亮度" style="margin: 0">
-                    <el-slider v-model="color.luminosity"></el-slider>
+                    <el-slider v-model="color.luminosity" @change="setColor"></el-slider>
                 </el-form-item>
             </el-form>
         </div>
 
         <el-form class="button-list">
             <el-form-item>
-                <el-button type="primary">开始绘画</el-button>
+                <el-button type="primary" @click = "enableDraw">开始绘画</el-button>
             </el-form-item>
             <el-form-item>
-                <el-button type="success">标记图案</el-button>
+                <el-button type="success" @click = "recognizeFigure">图形识别</el-button>
             </el-form-item>
             <el-form-item>
-                <el-button type="warning">撤销一笔</el-button>
+                <el-button type="warning" @click = "undoOneLine">撤销一笔</el-button>
             </el-form-item>
             <el-form-item>
-                <el-button type="danger">清空画布</el-button>
+                <el-button type="danger" @click = "clearCanvas">清空画布</el-button>
             </el-form-item>
         </el-form>
     </div>
@@ -38,16 +38,38 @@
         data() {
             return {
                 color: {
-                    hue: 50,
+                    hue: 0,
                     saturation: 100,
                     luminosity: 50,
                     alpha: 1
                 }
             }
         },
+        mounted() {
+            this.$nextTick(() => {
+                this.setColor();
+            });
+        },
         methods: {
-            onColorSelect() {
-                console.log(this.color);
+            setColor() {
+                let h = this.color.hue;
+                let s = this.color.saturation;
+                let l = this.color.luminosity;
+                let a = this.color.alpha;
+                let color = "hsla(" + h + "," + s + "%," + l + "%," + a + ")";
+                this.$bus.emit("setColor", color);
+            },
+            enableDraw() {
+                this.$bus.$emit("enableDraw");
+            },
+            recognizeFigure() {
+                this.$bus.$emit("recognizeFigure");
+            },
+            undoOneLine() {
+                this.$bus.$emit("undoOneLine");
+            },
+            clearCanvas() {
+                this.$bus.$emit("clearCanvas");
             }
         }
     };
