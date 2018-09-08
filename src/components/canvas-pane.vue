@@ -7,14 +7,18 @@
 </template>
 
 <script>
+    import * as rasterizeHTML from "rasterizehtml";
+
     export default {
         name: "canvas-pane",
         data() {
             return {
+                color: "hsla(0,100,50,1)",
                 ratio: 9/16,
                 canvas: null,
                 canvasContext: null,
                 isDrawing: false,
+                drawingEnabled: false,
                 oldPoint: {
                     x: 0,
                     y: 0
@@ -41,6 +45,61 @@
             }
         },
         mounted() {
+            this.$bus.$on("setColor", (color) => {
+                this.color = color;
+            });
+            this.$bus.$on("enableDraw", () => {
+                if(this.drawingEnabled === false) {
+                    this.drawingEnabled = true;
+                }
+                else {
+                    alert("请先对已绘画的图形进行标记！");
+                }
+            });
+            this.$bus.$on("recognizeFigure", () => {
+                if(this.drawingEnabled && this.figure.lines.length > 0) {
+                    if(this.figure.lines.length === 1) {
+                        this.setFigureColorAndTag(this.figure, "#F56C6C", "圆形");
+                    }
+                    else if(this.figure.lines.length === 3) {
+                        this.setFigureColorAndTag(this.figure, "#E6A23C", "三角形");
+                    }
+                    else if(this.figure.lines.length === 4) {
+                        this.setFigureColorAndTag(this.figure, "#409EFF", "四边形");
+                    }
+                    else if(this.figure.lines.length === 5) {
+                        this.setFigureColorAndTag(this.figure, "#67C23A", "五边形");
+                    }
+                    else if(this.figure.lines.length === 6) {
+                        this.setFigureColorAndTag(this.figure, "#9C27B0", "六边形");
+                    }
+                    else {
+                        this.setFigureColorAndTag(this.figure, "#000000", "其他");
+                    }
+
+                    alert("识别结果：" + this.figure.tag);
+
+                    let oneFigure = JSON.parse(JSON.stringify(this.figure));
+                    this.painting.push(oneFigure);
+                    this.figure.lines = [];
+                    this.line.points = [];
+                    this.drawingEnabled = false;
+                }
+                else {
+                    this.drawingEnabled = false;
+
+                    alert("未进行绘制！请重新开始绘制！");
+                }
+            });
+            this.$bus.$on("undoOneLine", () => {
+                this.figure.lines.pop();
+                this.figure.tag = "";
+                this.repaint();
+            });
+            this.$bus.$on("clearCanvas", () => {
+                this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.clearSavedData();
+            });
             this.$nextTick(() => {
                 this.canvas = document.getElementById("canvas");
                 this.canvasContext = this.canvas.getContext("2d");
@@ -60,30 +119,34 @@
                 this.painting = [];
                 this.figure.lines = [];
                 this.line.points = [];
+                this.drawingEnabled = false;
+                this.isDrawing = false;
             },
 
             startDrawing(mouseEvent) {
-                this.isDrawing = true;
+                if(this.drawingEnabled) {
+                    this.isDrawing = true;
 
-                //计算出鼠标点击在canvas中的位置
-                let x = mouseEvent.offsetX;
-                let y = mouseEvent.offsetY;
-                this.oldPoint = {
-                    x: x,
-                    y: y
-                };
-                this.draw(x, y, 2, "black");
+                    //计算出鼠标点击在canvas中的位置
+                    let x = mouseEvent.offsetX;
+                    let y = mouseEvent.offsetY;
+                    this.oldPoint = {
+                        x: x,
+                        y: y
+                    };
+                    this.draw(x, y, 2, this.color);
 
-                // 存储画过的线
-                this.line.color = "black";
-                this.line.lineWidth = 2;
-                this.line.points.length = 0;
-                this.line.points.push(
-                    {
-                        percentX: x / this.canvas.width,
-                        percentY: y / this.canvas.height
-                    }
-                )
+                    // 存储画过的线
+                    this.line.color = this.color;
+                    this.line.lineWidth = 2;
+                    this.line.points.length = 0;
+                    this.line.points.push(
+                        {
+                            percentX: x / this.canvas.width,
+                            percentY: y / this.canvas.height
+                        }
+                    );
+                }
             },
 
             endDrawing() {
@@ -99,7 +162,7 @@
                 if(this.isDrawing) {
                     let x = mouseEvent.offsetX;
                     let y = mouseEvent.offsetY;
-                    this.draw(x, y, 2, "black");
+                    this.draw(x, y, 2, this.color);
                     this.oldPoint = {
                         x : x,
                         y : y
@@ -110,7 +173,7 @@
                             percentX: x / this.canvas.width,
                             percentY: y / this.canvas.height
                         }
-                    )
+                    );
                 }
             },
 
@@ -168,9 +231,22 @@
                             y: y
                         }
                     });
-
                 });
+                if(figure.tag != "") {
+                    let cssString = "position:absolute; white-space: nowrap;" + "top:" +
+                        this.oldPoint.y + "px;" + "left:" + this.oldPoint.x + "px;";
+                    rasterizeHTML.drawHTML('<span style="' + cssString + '">' + figure.tag + "</span>",
+                        this.canvas);
+                }
             },
+
+            setFigureColorAndTag(figure, color, tag) {
+                figure.tag = tag;
+                figure.lines.forEach((line) => {
+                    line.color = color;
+                });
+                this.repaint();
+            }
         }
     }
 </script>
