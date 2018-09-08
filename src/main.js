@@ -5,18 +5,20 @@ import App from './App'
 import router from './router'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
-import VueBus from 'vue-bus';
+import VueBus from 'vue-bus'
+import Vuex from 'vuex'
+import store from './global/store'
 
-Vue.use(ElementUI)
+Vue.use(ElementUI);
 Vue.use(VueBus);
-
-Vue.config.productionTip = false
+Vue.use(Vuex);
 
 /* eslint-disable no-new */
 new Vue({
-  el: '#app',
-  router,
-  components: { App },
-  template: '<App/>',
-  render: h => h(App)
-})
+    el: '#app',
+    router,
+    store,
+    components: { App },
+    template: '<App/>',
+    render: h => h(App)
+});

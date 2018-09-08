@@ -59,28 +59,29 @@
             this.$bus.$on("recognizeFigure", () => {
                 if(this.drawingEnabled && this.figure.lines.length > 0) {
                     if(this.figure.lines.length === 1) {
-                        this.setFigureColorAndTag(this.figure, "#F56C6C", "圆形");
+                        this.setFigureColorAndTag(this.figure, this.$store.getters.getCircleColor, "圆形");
                     }
                     else if(this.figure.lines.length === 3) {
-                        this.setFigureColorAndTag(this.figure, "#E6A23C", "三角形");
+                        this.setFigureColorAndTag(this.figure, this.$store.getters.getTriangle, "三角形");
                     }
                     else if(this.figure.lines.length === 4) {
-                        this.setFigureColorAndTag(this.figure, "#409EFF", "四边形");
+                        this.setFigureColorAndTag(this.figure, this.$store.getters.getRectangleColor, "矩形");
                     }
                     else if(this.figure.lines.length === 5) {
-                        this.setFigureColorAndTag(this.figure, "#67C23A", "五边形");
+                        this.setFigureColorAndTag(this.figure, this.$store.getters.getPentagonColor, "五边形");
                     }
                     else if(this.figure.lines.length === 6) {
-                        this.setFigureColorAndTag(this.figure, "#9C27B0", "六边形");
+                        this.setFigureColorAndTag(this.figure, this.$store.getters.getHexagonColor, "六边形");
                     }
                     else {
-                        this.setFigureColorAndTag(this.figure, "#000000", "其他");
+                        this.setFigureColorAndTag(this.figure, this.$store.getters.getDefaultColor, "其他");
                     }
 
                     alert("识别结果：" + this.figure.tag);
 
                     let oneFigure = JSON.parse(JSON.stringify(this.figure));
                     this.painting.push(oneFigure);
+
                     this.figure.lines = [];
                     this.line.points = [];
                     this.drawingEnabled = false;
@@ -232,7 +233,7 @@
                         }
                     });
                 });
-                if(figure.tag != "") {
+                if(figure.tag !== "") {
                     let cssString = "position:absolute; white-space: nowrap;" + "top:" +
                         this.oldPoint.y + "px;" + "left:" + this.oldPoint.x + "px;";
                     rasterizeHTML.drawHTML('<span style="' + cssString + '">' + figure.tag + "</span>",
