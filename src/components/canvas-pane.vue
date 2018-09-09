@@ -15,6 +15,7 @@
             return {
                 color: "hsla(0,100,50,1)",
                 ratio: 9/16,
+                lineWidth: 2,
                 canvas: null,
                 canvasContext: null,
                 isDrawing: false,
@@ -23,7 +24,7 @@
                     x: 0,
                     y: 0
                 },
-                painting: [
+                paintingData: [
                     this.figure
                 ],
                 figure: {
@@ -34,7 +35,6 @@
                 },
                 line: {
                     color: "",
-                    lineWidth: "",
                     points: [
                         {
                             percentX: 0,
@@ -53,43 +53,58 @@
                     this.drawingEnabled = true;
                 }
                 else {
-                    alert("请先对已绘画的图形进行标记！");
+                    this.$message({
+                        message: "请先对已绘画的图形进行标记！",
+                        type: 'warning'
+                    });
                 }
             });
             this.$bus.$on("recognizeFigure", () => {
                 if(this.drawingEnabled && this.figure.lines.length > 0) {
                     if(this.figure.lines.length === 1) {
-                        this.setFigureColorAndTag(this.figure, this.$store.getters.getCircleColor, "圆形");
+                        this.setFigureColorAndTag(this.figure,
+                            this.$store.getters.getCircleColor, this.$store.getters.getCircleName);
                     }
                     else if(this.figure.lines.length === 3) {
-                        this.setFigureColorAndTag(this.figure, this.$store.getters.getTriangle, "三角形");
+                        this.setFigureColorAndTag(this.figure,
+                            this.$store.getters.getTriangleColor, this.$store.getters.getTriangleName);
                     }
                     else if(this.figure.lines.length === 4) {
-                        this.setFigureColorAndTag(this.figure, this.$store.getters.getRectangleColor, "矩形");
+                        this.setFigureColorAndTag(this.figure,
+                            this.$store.getters.getRectangleColor, this.$store.getters.getRectangleName);
                     }
                     else if(this.figure.lines.length === 5) {
-                        this.setFigureColorAndTag(this.figure, this.$store.getters.getPentagonColor, "五边形");
+                        this.setFigureColorAndTag(this.figure,
+                            this.$store.getters.getPentagonColor, this.$store.getters.getPentagonName);
                     }
                     else if(this.figure.lines.length === 6) {
-                        this.setFigureColorAndTag(this.figure, this.$store.getters.getHexagonColor, "六边形");
+                        this.setFigureColorAndTag(this.figure,
+                            this.$store.getters.getHexagonColor, this.$store.getters.getHexagonName);
                     }
                     else {
-                        this.setFigureColorAndTag(this.figure, this.$store.getters.getDefaultColor, "其他");
+                        this.setFigureColorAndTag(this.figure,
+                            this.$store.getters.getDefaultColor, this.$store.getters.getDefaultName);
                     }
 
-                    alert("识别结果：" + this.figure.tag);
+                    this.$message({
+                        message: "识别结果：" + this.figure.tag,
+                        type: 'success'
+                    });
 
                     let oneFigure = JSON.parse(JSON.stringify(this.figure));
-                    this.painting.push(oneFigure);
+                    this.paintingData.push(oneFigure);
 
+                    this.figure.tag = "";
                     this.figure.lines = [];
+                    this.line.color = "";
                     this.line.points = [];
                     this.drawingEnabled = false;
                 }
                 else {
-                    this.drawingEnabled = false;
-
-                    alert("未进行绘制！请重新开始绘制！");
+                    this.$message({
+                        message: "未进行绘制！请开始绘制！",
+                        type: 'warning'
+                    });
                 }
             });
             this.$bus.$on("undoOneLine", () => {
@@ -100,6 +115,17 @@
             this.$bus.$on("clearCanvas", () => {
                 this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
                 this.clearSavedData();
+            });
+            this.$bus.$on("readFile", (paintingData) => {
+                this.clearSavedData();
+                this.paintingData = paintingData;
+                this.repaint();
+            });
+            this.$bus.$on("saveFile", (callback) => {
+                let paintingData = JSON.parse(JSON.stringify(this.paintingData));
+                let lastFigure = JSON.parse(JSON.stringify(this.figure));
+                paintingData.push(lastFigure);
+                callback(JSON.stringify(paintingData));
             });
             this.$nextTick(() => {
                 this.canvas = document.getElementById("canvas");
@@ -117,8 +143,10 @@
         methods: {
             clearSavedData() {
                 // JS可以用长度赋值为0的方式清空数组
-                this.painting = [];
+                this.paintingData = [];
+                this.figure.tag = "";
                 this.figure.lines = [];
+                this.line.color = "";
                 this.line.points = [];
                 this.drawingEnabled = false;
                 this.isDrawing = false;
@@ -135,11 +163,10 @@
                         x: x,
                         y: y
                     };
-                    this.draw(x, y, 2, this.color);
+                    this.draw(x, y, this.color);
 
                     // 存储画过的线
                     this.line.color = this.color;
-                    this.line.lineWidth = 2;
                     this.line.points.length = 0;
                     this.line.points.push(
                         {
@@ -163,7 +190,7 @@
                 if(this.isDrawing) {
                     let x = mouseEvent.offsetX;
                     let y = mouseEvent.offsetY;
-                    this.draw(x, y, 2, this.color);
+                    this.draw(x, y, this.color);
                     this.oldPoint = {
                         x : x,
                         y : y
@@ -178,11 +205,11 @@
                 }
             },
 
-            draw(x, y, lineWidth, color) {
+            draw(x, y, color) {
                 this.canvasContext.beginPath();
 
                 //线的宽度和样式等信息
-                this.canvasContext.lineWidth = lineWidth;
+                this.canvasContext.lineWidth = this.lineWidth;
                 this.canvasContext.lineCap = "round";
                 this.canvasContext.strokeStyle = color;
 
@@ -204,7 +231,7 @@
             repaint() {
                 this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-                this.painting.forEach((figure) => {
+                this.paintingData.forEach((figure) => {
                     this.drawOneFigure(figure);
                 });
                 this.drawOneFigure(this.figure);
@@ -212,7 +239,6 @@
 
             drawOneFigure(figure) {
                 figure.lines.forEach((line) => {
-                    let lineWidth = line.lineWidth;
                     let color = line.color;
 
                     line.points.forEach((point, index) => {
@@ -226,7 +252,7 @@
                             }
                         }
 
-                        this.draw(x, y, lineWidth, color);
+                        this.draw(x, y, color);
                         this.oldPoint = {
                             x: x,
                             y: y
@@ -247,7 +273,7 @@
                     line.color = color;
                 });
                 this.repaint();
-            }
+            },
         }
     }
 </script>
