@@ -17,7 +17,31 @@
                 <el-button type="primary" @click = "enableDraw">开始绘画</el-button>
             </el-form-item>
             <el-form-item>
-                <el-button type="success" @click = "recognizeFigure">图形识别</el-button>
+                <el-popover placement="right" trigger="hover">
+                    <div class="recognition-info">
+                        <el-form label-width="80px" labelPosition="left">
+                            <el-form-item :label=this.$store.getters.getTriangleName>
+                                <div class="littleCircle" v-bind:style="{ backgroundColor: this.$store.getters.getTriangleColor}"></div>
+                            </el-form-item>
+                            <el-form-item :label=this.$store.getters.getRectangleName>
+                                <div class="littleCircle" v-bind:style="{ backgroundColor: this.$store.getters.getRectangleColor}"></div>
+                            </el-form-item>
+                            <el-form-item :label=this.$store.getters.getPentagonName>
+                                <div class="littleCircle" v-bind:style="{ backgroundColor: this.$store.getters.getPentagonColor}"></div>
+                            </el-form-item>
+                            <el-form-item :label=this.$store.getters.getHexagonName>
+                                <div class="littleCircle" v-bind:style="{ backgroundColor: this.$store.getters.getHexagonColor}"></div>
+                            </el-form-item>
+                            <el-form-item :label=this.$store.getters.getCircleName>
+                                <div class="littleCircle" v-bind:style="{ backgroundColor: this.$store.getters.getCircleColor}"></div>
+                            </el-form-item>
+                            <el-form-item :label=this.$store.getters.getDefaultName>
+                                <div class="littleCircle" v-bind:style="{ backgroundColor: this.$store.getters.getDefaultColor}"></div>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                    <el-button slot="reference" type="success" @click = "recognizeFigure">图形识别</el-button>
+                </el-popover>
             </el-form-item>
             <el-form-item>
                 <el-button type="warning" @click = "undoOneLine">撤销一笔</el-button>
@@ -107,6 +131,25 @@
         width: 200px;
         height: 60px;
         font-size: 16px;
+    }
+
+    .recognition-info .el-form-item {
+        height: 30px;
+        margin: 0;
+    }
+
+    .el-form-item__label {
+        font-size: 16px;
+        font-weight: bold;
+        height: 30px;
+    }
+
+    .littleCircle {
+        width: 20px;
+        height: 20px;
+        border-radius: 10px;
+        display: flex;
+        margin: 10px 0 0 0;
     }
 </style>
 

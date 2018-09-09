@@ -10,18 +10,43 @@ Vue.use(Vuex);
 */
 let store = new Vuex.Store({
     state: {
-        circleColor: "#F56C6C",
-        triangleColor: "#E6A23C",
-        rectangleColor: "#409EFF",
-        pentagonColor: "#67C23A",
-        hexagonColor: "#9C27B0",
+        circleName: "圆形",
+        triangleName: "三角形",
+        rectangleName: "长方形",
+        pentagonName: "五边形",
+        hexagonName: "六边形",
+        defaultName: "其他",
+        circleColor: "#FFB50B",
+        triangleColor: "#FC0006",
+        rectangleColor: "#0E00FF",
+        pentagonColor: "#1CD20E",
+        hexagonColor: "#9600FF",
         defaultColor: "#000000"
     },
     getters: {
+        getCircleName(state) {
+            return state.circleName;
+        },
+        getTriangleName(state) {
+            return state.triangleName;
+        },
+        getRectangleName(state) {
+            return state.rectangleName;
+        },
+        getPentagonName(state) {
+            return state.pentagonName;
+        },
+        getHexagonName(state) {
+            return state.hexagonName;
+        },
+        getDefaultName(state) {
+            return state.defaultName;
+        },
+
         getCircleColor(state) {
             return state.circleColor;
         },
-        getTriangle(state) {
+        getTriangleColor(state) {
             return state.triangleColor;
         },
         getRectangleColor(state) {
