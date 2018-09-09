@@ -135,7 +135,7 @@
 
     .recognition-info .el-form-item {
         height: 30px;
-        margin: 0;
+        margin: 0 25px;
     }
 
     .el-form-item__label {

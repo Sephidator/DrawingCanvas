@@ -19,9 +19,9 @@ let store = new Vuex.Store({
         circleColor: "#FFB50B",
         triangleColor: "#FC0006",
         rectangleColor: "#0E00FF",
-        pentagonColor: "#1CD20E",
+        pentagonColor: "#139614",
         hexagonColor: "#9600FF",
-        defaultColor: "#000000"
+        defaultColor: "#280091"
     },
     getters: {
         getCircleName(state) {
