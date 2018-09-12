@@ -38,7 +38,7 @@
     }
 
     .el-main {
-        padding: 0;
+        padding: 0!important;
     }
 
     .whole-page {
