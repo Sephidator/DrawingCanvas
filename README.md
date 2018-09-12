@@ -22,6 +22,16 @@
 
 
 
+## 部署的笔记
+
+> · 项目build过后打开为空页面：http://www.sail.name/2017/06/10/how-to-open-index-html-of-vue-over-file/
+>
+> · 使用logo图片时console报错解决：https://blog.csdn.net/lhb_11/article/details/79455015
+>
+> · 部署到/docs文件夹而非项目根目录：https://zhuanlan.zhihu.com/p/38480155
+
+
+
 ## 运行
 
 用webstorm等IDE打开项目，运行下面的命令行进行相应操作
