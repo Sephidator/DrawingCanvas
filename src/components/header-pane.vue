@@ -132,6 +132,7 @@
     }
 
     .dialog-footer .el-button {
-        width: 120px;
+        width: 100px;
+        height: 50px;
     }
 </style>
