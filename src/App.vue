@@ -1,5 +1,5 @@
 <template>
-  <el-container class="whole-page">
+  <el-container class='whole-page'>
     <el-header>
       <header-pane></header-pane>
     </el-header>
@@ -15,15 +15,14 @@
 </template>
 
 <script>
-    import HeaderPane from './components/header-pane'
-    import AsidePane from "./components/aside-pane";
-    import CanvasPane from "./components/canvas-pane";
+import HeaderPane from './components/header-pane';
+import AsidePane from './components/aside-pane';
+import CanvasPane from './components/canvas-pane';
 
-
-    export default {
-        name: 'App',
-        components: {CanvasPane, AsidePane, HeaderPane}
-    }
+export default {
+  name: 'App',
+  components: {CanvasPane, AsidePane, HeaderPane}
+};
 </script>
 
 <style>
