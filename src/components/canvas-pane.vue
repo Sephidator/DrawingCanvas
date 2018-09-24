@@ -7,140 +7,83 @@
 </template>
 
 <script>
-import * as rasterizeHTML from 'rasterizehtml';
+import logic from '../data/global/logic';
+import Figure from '../data/dataframe/Figure';
+import Line from '../data/dataframe/Line';
+import Canvas from '../data/dataframe/Canvas';
 
 export default {
   name: 'canvas-pane',
+
   data () {
     return {
       color: 'hsla(0,100,50,1)',
       ratio: 9 / 16,
-      lineWidth: 2,
-      canvas: null,
-      canvasContext: null,
       isDrawing: false,
       drawingEnabled: false,
-      oldPoint: {
-        x: 0,
-        y: 0
-      },
-      paintingData: [
-        this.figure
-      ],
-      figure: {
-        tag: '',
-        lines: [
-          this.line
-        ]
-      },
-      line: {
-        color: '',
-        points: [
-          {
-            percentX: 0,
-            percentY: 0
-          }
-        ]
-      }
+      canvas: null,
+      canvasContext: null,
+      paintingData: null,
+      figure: null,
+      line: null
     };
   },
+
   mounted () {
     this.$bus.$on('setColor', (color) => {
       this.color = color;
     });
     this.$bus.$on('enableDraw', () => {
-      if (this.drawingEnabled === false) {
-        this.drawingEnabled = true;
-      } else if (this.figure.lines.length !== 0) {
-        this.$message({
-          message: '请先对已绘画的图形进行标记！',
-          type: 'warning'
-        });
-      }
+      this.enableDraw();
     });
     this.$bus.$on('recognizeFigure', () => {
-      if (this.drawingEnabled && this.figure.lines.length > 0) {
-        if (this.figure.lines.length === 1) {
-          this.setFigureColorAndTag(this.figure,
-            this.$store.getters.getCircleColor, this.$store.getters.getCircleName);
-        } else if (this.figure.lines.length === 3) {
-          this.setFigureColorAndTag(this.figure,
-            this.$store.getters.getTriangleColor, this.$store.getters.getTriangleName);
-        } else if (this.figure.lines.length === 4) {
-          this.setFigureColorAndTag(this.figure,
-            this.$store.getters.getRectangleColor, this.$store.getters.getRectangleName);
-        } else if (this.figure.lines.length === 5) {
-          this.setFigureColorAndTag(this.figure,
-            this.$store.getters.getPentagonColor, this.$store.getters.getPentagonName);
-        } else if (this.figure.lines.length === 6) {
-          this.setFigureColorAndTag(this.figure,
-            this.$store.getters.getHexagonColor, this.$store.getters.getHexagonName);
-        } else {
-          this.setFigureColorAndTag(this.figure,
-            this.$store.getters.getDefaultColor, this.$store.getters.getDefaultName);
-        }
-
-        this.$message({
-          message: '识别结果：' + this.figure.tag,
-          type: 'success'
-        });
-
-        let oneFigure = JSON.parse(JSON.stringify(this.figure));
-        this.paintingData.push(oneFigure);
-
-        this.figure.tag = '';
-        this.figure.lines = [];
-        this.line.color = '';
-        this.line.points = [];
-        this.drawingEnabled = false;
-      } else {
-        this.$message({
-          message: '未进行绘制！请开始绘制！',
-          type: 'warning'
-        });
-      }
+      this.recognizeFigure();
     });
     this.$bus.$on('undoOneLine', () => {
-      this.figure.lines.pop();
-      this.figure.tag = '';
+      this.figure.removeOneLine();
       this.repaint();
     });
     this.$bus.$on('clearCanvas', () => {
-      this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.canvas.clear();
       this.clearSavedData();
     });
-    this.$bus.$on('readFile', (paintingData) => {
+
+    this.$bus.$on('readFile', (json) => {
       this.clearSavedData();
-      this.paintingData = paintingData;
+      json.forEach((figureJSON) => {
+        this.paintingData.push(new Figure(figureJSON));
+      });
       this.repaint();
     });
     this.$bus.$on('saveFile', (callback) => {
-      let paintingData = JSON.parse(JSON.stringify(this.paintingData));
-      let lastFigure = JSON.parse(JSON.stringify(this.figure));
-      paintingData.push(lastFigure);
-      callback(JSON.stringify(paintingData));
+      const data = [];
+      this.paintingData.forEach((figure) => {
+        data.push(figure.toJSON());
+      });
+      if (this.figure.lineNum !== 0) {
+        data.push(this.figure.toJSON());
+      }
+      callback(JSON.stringify(data));
     });
+
     this.$nextTick(() => {
-      this.canvas = document.getElementById('canvas');
-      this.canvasContext = this.canvas.getContext('2d');
-      this.canvas.addEventListener('mousedown', this.startDrawing);
-      this.canvas.addEventListener('mouseup', this.endDrawing);
-      this.canvas.addEventListener('mouseout', this.endDrawing);
-      this.canvas.addEventListener('mousemove', this.moveBrush);
+      this.canvas = new Canvas(document.getElementById('canvas'));
+      this.canvas.setEvent('mousedown', this.startDrawing);
+      this.canvas.setEvent('mouseup', this.endDrawing);
+      this.canvas.setEvent('mouseout', this.endDrawing);
+      this.canvas.setEvent('mousemove', this.moveBrush);
 
       this.clearSavedData();
       this.resetCanvas();
       window.addEventListener('resize', this.resetCanvas);
     });
   },
+
   methods: {
     clearSavedData () {
-      // JS可以用长度赋值为0的方式清空数组
       this.paintingData = [];
-      this.figure.tag = '';
-      this.figure.lines = [];
-      this.line.color = '';
-      this.line.points = [];
+      this.figure = new Figure();
+      this.line = new Line();
       this.drawingEnabled = false;
       this.isDrawing = false;
     },
@@ -150,122 +93,83 @@ export default {
         this.isDrawing = true;
 
         // 计算出鼠标点击在canvas中的位置
-        let x = mouseEvent.offsetX;
-        let y = mouseEvent.offsetY;
-        this.oldPoint = {
-          x: x,
-          y: y
-        };
-        this.draw(x, y, this.color);
+        const x = mouseEvent.offsetX;
+        const y = mouseEvent.offsetY;
+        this.canvas.newStroke();
+        this.canvas.draw(x, y, this.color);
 
-        // 存储画过的线
+        // 存储画的线
+        this.line = new Line();
         this.line.color = this.color;
-        this.line.points.length = 0;
-        this.line.points.push(
-          {
-            percentX: x / this.canvas.width,
-            percentY: y / this.canvas.height
-          }
-        );
+        this.line.addPoint(x / this.canvas.width, y / this.canvas.height);
       }
     },
 
     endDrawing () {
       if (this.isDrawing) {
-        // 深拷贝，避免因为引用传递覆盖之前保存的旧的line
-        let oneLine = JSON.parse(JSON.stringify(this.line));
-        this.figure.lines.push(oneLine);
+        this.figure.addLine(this.line.clone());
         this.isDrawing = false;
       }
     },
 
     moveBrush (mouseEvent) {
       if (this.isDrawing) {
-        let x = mouseEvent.offsetX;
-        let y = mouseEvent.offsetY;
-        this.draw(x, y, this.color);
-        this.oldPoint = {
-          x: x,
-          y: y
-        };
-
-        this.line.points.push(
-          {
-            percentX: x / this.canvas.width,
-            percentY: y / this.canvas.height
-          }
-        );
+        const x = mouseEvent.offsetX;
+        const y = mouseEvent.offsetY;
+        this.canvas.draw(x, y, this.color);
+        this.line.addPoint(x / this.canvas.width, y / this.canvas.height);
       }
     },
 
-    draw (x, y, color) {
-      this.canvasContext.beginPath();
-
-      // 线的宽度和样式等信息
-      this.canvasContext.lineWidth = this.lineWidth;
-      this.canvasContext.lineCap = 'round';
-      this.canvasContext.strokeStyle = color;
-
-      this.canvasContext.moveTo(x, y);
-      this.canvasContext.lineTo(this.oldPoint.x, this.oldPoint.y);
-      this.canvasContext.stroke();
-
-      this.canvasContext.closePath();
-    },
-
     resetCanvas () {
-      let canvasWidth = document.getElementById('canvas').offsetWidth;
-      this.canvas.width = canvasWidth;
-      this.canvas.height = canvasWidth * this.ratio;
-
+      const canvasWidth = document.getElementById('canvas').offsetWidth;
+      this.canvas.setSize(canvasWidth, canvasWidth * this.ratio);
       this.repaint();
     },
 
     repaint () {
-      this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
+      this.canvas.clear();
       this.paintingData.forEach((figure) => {
-        this.drawOneFigure(figure);
+        figure.draw(this.canvas);
       });
-      this.drawOneFigure(this.figure);
+      this.figure.draw(this.canvas);
     },
 
-    drawOneFigure (figure) {
-      figure.lines.forEach((line) => {
-        let color = line.color;
-
-        line.points.forEach((point, index) => {
-          let x = point.percentX * this.canvas.width;
-          let y = point.percentY * this.canvas.height;
-
-          if (index === 0) {
-            this.oldPoint = {
-              x: x,
-              y: y
-            };
-          }
-
-          this.draw(x, y, color);
-          this.oldPoint = {
-            x: x,
-            y: y
-          };
+    enableDraw () {
+      if (this.drawingEnabled === false) {
+        this.drawingEnabled = true;
+      } else if (this.figure.lineNum !== 0) {
+        this.$message({
+          message: '请先对已绘画的图形进行标记！',
+          type: 'warning'
         });
-      });
-      if (figure.tag !== '') {
-        let cssString = 'position:absolute; white-space: nowrap;' + 'top:' +
-          this.oldPoint.y + 'px;' + 'left:' + this.oldPoint.x + 'px;';
-        rasterizeHTML.drawHTML('<span style="' + cssString + '">' + figure.tag + '</span>',
-          this.canvas);
       }
     },
 
-    setFigureColorAndTag (figure, color, tag) {
-      figure.tag = tag;
-      figure.lines.forEach((line) => {
-        line.color = color;
-      });
-      this.repaint();
+    recognizeFigure () {
+      if (this.drawingEnabled && this.figure.lineNum > 0) {
+        const recognition = logic.recognize(this.figure);
+        this.figure.color = recognition.color;
+        this.figure.tag = recognition.tag;
+        this.repaint();
+
+        this.$message({
+          message: '识别结果：' + this.figure.tag,
+          type: 'success'
+        });
+
+        const oneFigure = this.figure.clone();
+        this.paintingData.push(oneFigure);
+
+        this.figure = new Figure();
+        this.line = new Line();
+        this.drawingEnabled = false;
+      } else {
+        this.$message({
+          message: '未进行绘制！请开始绘制！',
+          type: 'warning'
+        });
+      }
     }
   }
 };

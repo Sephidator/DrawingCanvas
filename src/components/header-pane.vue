@@ -5,7 +5,7 @@
     <div class='load-button-container'>
       <label class='load-button' style='display: flex'>
         <i class='el-icon-edit-outline'></i>
-        <input type='file' @change='readFile' />
+        <input type='file' @change='readFile' accept='.json'/>
       </label>
       <el-button class='load-button' icon='el-icon-download'
              @click='dialogFormVisible = true'></el-button>
@@ -28,24 +28,36 @@
 </template>
 
 <script>
+import logic from '../data/global/logic';
+
 export default {
   name: 'function-pane',
+
   data () {
     return {
       dialogFormVisible: false,
       fileName: ''
     };
   },
+
   methods: {
     readFile (e) {
-      let file = e.target.files[0];
-      let reader = new FileReader();
+      const file = e.target.files[0];
+      const reader = new FileReader();
       reader.onload = (e) => {
-        let paintingData = JSON.parse(e.target.result);
-        this.$bus.$emit('readFile', paintingData);
+        const json = JSON.parse(e.target.result);
+        if (logic.isValidJSON(json)) {
+          this.$bus.$emit('readFile', json);
+        } else {
+          this.$message({
+            message: '所选文件的数据不正确！',
+            type: 'warning'
+          });
+        }
       };
       reader.readAsText(file);
     },
+
     saveFile () {
       if (this.fileName === '') {
         this.$message({
@@ -55,14 +67,11 @@ export default {
       } else {
         this.dialogFormVisible = false;
 
-        let dataToSave = '';
-        this.$bus.$emit('saveFile', (paintingData) => {
-          dataToSave = paintingData;
+        this.$bus.$emit('saveFile', (data) => {
+          const FileSaver = require('file-saver');
+          const file = new File([data], this.fileName + '.json', {type: 'text/plain;charset=utf-8'});
+          FileSaver.saveAs(file);
         });
-
-        let FileSaver = require('file-saver');
-        let file = new File([dataToSave], this.fileName + '.json', {type: 'text/plain;charset=utf-8'});
-        FileSaver.saveAs(file);
 
         this.$message({
           message: '文件保存成功！',
@@ -109,7 +118,7 @@ export default {
   text-align: center;
   padding: 0;
   border: 0;
-  font-size: 30px;
+  font-size: 30px!important;
   color: black;
 }
 

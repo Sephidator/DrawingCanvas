@@ -59,6 +59,7 @@ import ColorPicker from '@radial-color-picker/vue-color-picker';
 export default {
   name: 'color-board',
   components: { ColorPicker },
+
   data () {
     return {
       color: {
@@ -69,29 +70,35 @@ export default {
       }
     };
   },
+
   mounted () {
     this.$nextTick(() => {
       this.setColor();
     });
   },
+
   methods: {
     setColor () {
-      let h = this.color.hue;
-      let s = this.color.saturation;
-      let l = this.color.luminosity;
-      let a = this.color.alpha;
-      let color = 'hsla(' + h + ',' + s + '%,' + l + '%,' + a + ')';
+      const h = this.color.hue;
+      const s = this.color.saturation;
+      const l = this.color.luminosity;
+      const a = this.color.alpha;
+      const color = 'hsla(' + h + ',' + s + '%,' + l + '%,' + a + ')';
       this.$bus.emit('setColor', color);
     },
+
     enableDraw () {
       this.$bus.$emit('enableDraw');
     },
+
     recognizeFigure () {
       this.$bus.$emit('recognizeFigure');
     },
+
     undoOneLine () {
       this.$bus.$emit('undoOneLine');
     },
+
     clearCanvas () {
       this.$bus.$emit('clearCanvas');
     }
