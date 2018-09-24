@@ -5,10 +5,10 @@
     </el-header>
     <el-container>
       <el-aside>
-          <aside-pane></aside-pane>
+        <aside-pane></aside-pane>
       </el-aside>
       <el-main>
-          <canvas-pane></canvas-pane>
+        <canvas-pane></canvas-pane>
       </el-main>
     </el-container>
   </el-container>
@@ -26,23 +26,23 @@ export default {
 </script>
 
 <style>
-    /* overwrite CSS of element-ui */
-    .el-header {
-        height: 80px !important;
-        padding: 0 !important;
-    }
+/* overwrite CSS of element-ui */
+.el-header {
+  height: 80px !important;
+  padding: 0 !important;
+}
 
-    .el-aside {
-        width: 240px !important;
-    }
+.el-aside {
+  width: 240px !important;
+}
 
-    .el-main {
-        padding: 0!important;
-    }
+.el-main {
+  padding: 0!important;
+}
 
-    .whole-page {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-    }
+.whole-page {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
 </style>

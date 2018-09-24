@@ -7,7 +7,7 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import VueBus from 'vue-bus';
 import Vuex from 'vuex';
-import store from './global/store';
+import store from './data/global/store';
 
 Vue.use(ElementUI);
 Vue.use(VueBus);
