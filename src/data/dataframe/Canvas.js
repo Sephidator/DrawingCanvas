@@ -1,4 +1,4 @@
-import store from '../global/store';
+import store from '../utils/store';
 
 export default class Canvas {
   element = null;

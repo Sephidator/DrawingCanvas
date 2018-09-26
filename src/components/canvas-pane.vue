@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import logic from '../data/global/logic';
+import logic from '../data/utils/logic';
 import Figure from '../data/dataframe/Figure';
 import Line from '../data/dataframe/Line';
 import Canvas from '../data/dataframe/Canvas';

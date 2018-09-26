@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import logic from '../data/global/logic';
+import logic from '../data/utils/logic';
 
 export default {
   name: 'function-pane',
