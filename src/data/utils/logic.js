@@ -29,32 +29,36 @@ const logic = {
   },
 
   isValidJSON (json) {
-    if (!(json instanceof Array)) {
-      return false;
-    } else if (json.length === 0) {
-      return true;
-    }
+    try {
+      if (!(json instanceof Array)) {
+        return false;
+      } else if (json.length === 0) {
+        return true;
+      }
 
-    let figure = json[0];
-    if (figure.tag === undefined || figure.lines === undefined) {
-      return false;
-    } else if (!(figure.lines instanceof Array)) {
-      return false;
-    } else if (figure.lines.length === 0) {
-      return true;
-    }
+      let figure = json[0];
+      if (figure.tag === undefined || figure.lines === undefined) {
+        return false;
+      } else if (!(figure.lines instanceof Array)) {
+        return false;
+      } else if (figure.lines.length === 0) {
+        return true;
+      }
 
-    let line = figure.lines[0];
-    if (line.color === undefined || line.points === undefined) {
-      return false;
-    } else if (!(line.points instanceof Array)) {
-      return false;
-    } else if (line.points.length === 0) {
-      return true;
-    }
+      let line = figure.lines[0];
+      if (line.color === undefined || line.points === undefined) {
+        return false;
+      } else if (!(line.points instanceof Array)) {
+        return false;
+      } else if (line.points.length === 0) {
+        return true;
+      }
 
-    let point = line.points[0];
-    return (point.percentX !== undefined && point.percentY !== undefined);
+      let point = line.points[0];
+      return (point.percentX !== undefined && point.percentY !== undefined);
+    } catch (err) {
+      return false;
+    }
   }
 };
 
