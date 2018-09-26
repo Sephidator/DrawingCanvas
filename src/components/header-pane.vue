@@ -45,10 +45,14 @@ export default {
       const file = e.target.files[0];
       const reader = new FileReader();
       reader.onload = (e) => {
-        const json = JSON.parse(e.target.result);
-        if (logic.isValidJSON(json)) {
-          this.$bus.$emit('readFile', json);
-        } else {
+        try {
+          const json = JSON.parse(e.target.result);
+          if (logic.isValidJSON(json)) {
+            this.$bus.$emit('readFile', json);
+          } else {
+            throw new Error();
+          }
+        } catch (err) {
           this.$message({
             message: '所选文件的数据不正确！',
             type: 'warning'
